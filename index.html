@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dxplorer — Data Quality Profiler Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#1E1E2E;--card:#181825;--border:#313244;--accent:#89B4FA;--green:#A6E3A1;--red:#F38BA8;--yellow:#F9E2AF;--text:#CDD6F4;--dim:#6C7086;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.nav{background:#11111B;border-bottom:1px solid var(--border);padding:14px 30px;display:flex;justify-content:space-between;align-items:center;}
+.nav .logo{font-size:20px;font-weight:900;color:var(--accent);font-family:'JetBrains Mono',monospace;}.nav .logo span{color:var(--dim);}
+.nav .badges{display:flex;gap:8px;}
+.nav .badge{padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;border:1px solid;}
+.nav .badge.pypi{background:#F9E2AF15;color:var(--yellow);border-color:#F9E2AF44;}
+.nav .badge.demo{background:#F59E0B22;color:#FBBF24;border-color:#F59E0B44;}
+.container{max-width:1100px;margin:0 auto;padding:24px;}
+.hero{text-align:center;margin-bottom:24px;}
+.hero h1{font-size:28px;font-weight:900;margin-bottom:6px;}
+.hero p{font-size:14px;color:var(--dim);}
+.install{background:var(--green);color:#1E1E2E;text-align:center;padding:10px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;margin-bottom:20px;}
+.tabs{display:flex;gap:4px;margin-bottom:16px;}
+.tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--dim);transition:all 0.2s;}
+.tab.active{background:var(--accent);color:#1E1E2E;border-color:var(--accent);}
+.section{display:none;}.section.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.card h3{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.dataset-btn{background:var(--accent);color:#1E1E2E;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin:4px;transition:all 0.2s;}
+.dataset-btn:hover{opacity:0.9;}
+.dataset-btn.active{box-shadow:0 0 0 3px rgba(137,180,250,0.3);}
+table{width:100%;border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace;}
+table th{text-align:left;padding:8px 12px;background:#11111B;color:var(--accent);font-weight:700;border-bottom:2px solid var(--border);}
+table td{padding:8px 12px;border-bottom:1px solid var(--border);}
+.good{color:var(--green);}
+.warn{color:var(--yellow);}
+.bad{color:var(--red);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.bar-cell .bar{flex:1;height:8px;background:#11111B;border-radius:4px;overflow:hidden;}
+.bar-cell .bar .fill{height:100%;border-radius:4px;}
+.suggestion{background:#11111B;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+.suggestion .method{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.suggestion .reason{font-size:10px;color:var(--dim);}
+.suggestion .arrow{color:var(--accent);}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:120px;padding:10px 0;}
+.chart-bar{flex:1;border-radius:3px 3px 0 0;position:relative;transition:height 0.5s ease;}
+.chart-bar .lbl{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--dim);white-space:nowrap;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.stat .num{font-size:24px;font-weight:900;font-family:'JetBrains Mono',monospace;}
+.stat .lbl{font-size:10px;color:var(--dim);margin-top:2px;}
+@media(max-width:768px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="logo">dxplorer<span> — Data Quality Profiler</span></div>
+  <div class="badges"><span class="badge demo">INTERACTIVE DEMO</span><span class="badge pypi">PyPI Published</span></div>
+</div>
+<div class="container">
+  <div class="install">$ pip install dxplorer</div>
+  <div class="hero">
+    <h1>Upload or Select a Dataset to Profile</h1>
+    <p>Click a sample dataset below to see dxplorer in action</p>
+  </div>
+  <div style="text-align:center;margin-bottom:24px;">
+    <button class="dataset-btn" onclick="loadDataset('ecommerce')">🛒 E-Commerce Sales</button>
+    <button class="dataset-btn" onclick="loadDataset('healthcare')">🏥 Patient Records</button>
+    <button class="dataset-btn" onclick="loadDataset('hr')">👥 HR Employee Data</button>
+  </div>
+  <div id="output" style="display:none;">
+    <div class="stats-row">
+      <div class="stat"><div class="num" style="color:#89B4FA;" id="s-rows">—</div><div class="lbl">Rows</div></div>
+      <div class="stat"><div class="num" style="color:#A6E3A1;" id="s-cols">—</div><div class="lbl">Columns</div></div>
+      <div class="stat"><div class="num" style="color:#F9E2AF;" id="s-missing">—</div><div class="lbl">Missing Values</div></div>
+      <div class="stat"><div class="num" style="color:#F38BA8;" id="s-quality">—</div><div class="lbl">Quality Score</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('profile',this)">📊 Profile</div>
+      <div class="tab" onclick="switchTab('missing',this)">🔍 Missing Analysis</div>
+      <div class="tab" onclick="switchTab('suggest',this)">🤖 AI Suggestions</div>
+      <div class="tab" onclick="switchTab('dist',this)">📈 Distributions</div>
+    </div>
+    <div class="section active" id="tab-profile"><div class="card"><h3>Column Profile</h3><div id="profile-table"></div></div></div>
+    <div class="section" id="tab-missing"><div class="card"><h3>Missing Value Heatmap</h3><div id="missing-table"></div></div></div>
+    <div class="section" id="tab-suggest"><div class="card"><h3>AI Imputation Suggestions</h3><div id="suggest-list"></div></div></div>
+    <div class="section" id="tab-dist"><div class="card"><h3>Value Distributions</h3><div id="dist-chart"></div></div></div>
+  </div>
+</div>
+<script>
+const datasets={
+  ecommerce:{rows:10847,cols:12,missing:"3.2%",quality:"87/100",
+    columns:[
+      {name:"order_id",type:"int64",missing:0,unique:10847,quality:"Clean"},
+      {name:"customer_name",type:"object",missing:1.2,unique:8432,quality:"Minor"},
+      {name:"email",type:"object",missing:8.4,unique:9201,quality:"Action"},
+      {name:"product",type:"object",missing:0,unique:342,quality:"Clean"},
+      {name:"quantity",type:"int64",missing:0.3,unique:15,quality:"Clean"},
+      {name:"price",type:"float64",missing:0.1,unique:289,quality:"Clean"},
+      {name:"discount",type:"float64",missing:12.7,unique:45,quality:"Action"},
+      {name:"total",type:"float64",missing:0,unique:4521,quality:"Clean"},
+      {name:"date",type:"datetime",missing:0,unique:365,quality:"Clean"},
+      {name:"shipping_address",type:"object",missing:5.6,unique:7823,quality:"Warning"},
+      {name:"payment_method",type:"category",missing:0,unique:4,quality:"Clean"},
+      {name:"review_score",type:"float64",missing:22.3,unique:5,quality:"Action"},
+    ],
+    suggestions:[
+      {col:"email",method:"Flag & exclude from model",reason:"8.4% missing — email is identifer, not a feature. Exclude from ML pipeline."},
+      {col:"discount",method:"Fill with 0 (no discount)",reason:"12.7% missing likely means no discount was applied. Domain logic suggests 0."},
+      {col:"shipping_address",method:"KNN Imputation (k=5)",reason:"5.6% missing — use nearest neighbor based on customer and region."},
+      {col:"review_score",method:"Drop or separate model",reason:"22.3% missing — too sparse for reliable imputation. Consider a separate analysis."},
+      {col:"customer_name",method:"Forward fill by customer_id",reason:"1.2% missing — fill from other orders by same customer."},
+    ]},
+  healthcare:{rows:1647,cols:10,missing:"4.8%",quality:"82/100",
+    columns:[
+      {name:"patient_id",type:"int64",missing:0,unique:1647,quality:"Clean"},
+      {name:"age",type:"int64",missing:0,unique:53,quality:"Clean"},
+      {name:"gender",type:"category",missing:0,unique:2,quality:"Clean"},
+      {name:"blood_pressure",type:"float64",missing:3.1,unique:89,quality:"Minor"},
+      {name:"heart_rate",type:"int64",missing:1.2,unique:61,quality:"Minor"},
+      {name:"bmi",type:"float64",missing:2.4,unique:187,quality:"Minor"},
+      {name:"cholesterol",type:"float64",missing:7.8,unique:124,quality:"Warning"},
+      {name:"glucose",type:"float64",missing:5.3,unique:98,quality:"Warning"},
+      {name:"ejection_fraction",type:"float64",missing:0,unique:42,quality:"Clean"},
+      {name:"diagnosis",type:"category",missing:18.2,unique:8,quality:"Action"},
+    ],
+    suggestions:[
+      {col:"blood_pressure",method:"Median Imputation",reason:"3.1% missing — normally distributed, median preserves central tendency."},
+      {col:"cholesterol",method:"KNN Imputation (k=7)",reason:"7.8% missing — correlated with age and BMI, KNN captures this relationship."},
+      {col:"glucose",method:"Iterative Imputation (MICE)",reason:"5.3% missing — multiple correlations with other clinical features."},
+      {col:"diagnosis",method:"Exclude from training, predict separately",reason:"18.2% missing — this is likely the target variable. Do not impute."},
+      {col:"heart_rate",method:"Mean Imputation",reason:"1.2% missing — low missingness, mean is sufficient."},
+    ]},
+  hr:{rows:5234,cols:11,missing:"6.1%",quality:"79/100",
+    columns:[
+      {name:"employee_id",type:"int64",missing:0,unique:5234,quality:"Clean"},
+      {name:"name",type:"object",missing:0,unique:5234,quality:"Clean"},
+      {name:"department",type:"category",missing:0,unique:8,quality:"Clean"},
+      {name:"salary",type:"float64",missing:4.2,unique:2341,quality:"Warning"},
+      {name:"years_experience",type:"int64",missing:1.8,unique:35,quality:"Minor"},
+      {name:"performance_score",type:"float64",missing:8.7,unique:10,quality:"Action"},
+      {name:"satisfaction",type:"float64",missing:12.4,unique:10,quality:"Action"},
+      {name:"last_promotion",type:"datetime",missing:15.3,unique:1200,quality:"Action"},
+      {name:"education",type:"category",missing:3.1,unique:4,quality:"Minor"},
+      {name:"remote_work",type:"boolean",missing:0,unique:2,quality:"Clean"},
+      {name:"attrition",type:"boolean",missing:0,unique:2,quality:"Clean"},
+    ],
+    suggestions:[
+      {col:"salary",method:"Median by department",reason:"4.2% missing — salaries vary by department. Group median preserves structure."},
+      {col:"performance_score",method:"Mode by department + years",reason:"8.7% missing — categorical scale, use most frequent within group."},
+      {col:"satisfaction",method:"KNN Imputation (k=5)",reason:"12.4% missing — correlated with performance and attrition."},
+      {col:"last_promotion",method:"Flag as 'never promoted'",reason:"15.3% missing — likely means employee was never promoted. Create binary flag."},
+      {col:"education",method:"Mode Imputation",reason:"3.1% missing — categorical with 4 levels, mode is appropriate."},
+    ]}
+};
+
+function loadDataset(name){
+  document.querySelectorAll('.dataset-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  const d=datasets[name];
+  document.getElementById('output').style.display='block';
+  document.getElementById('s-rows').textContent=d.rows.toLocaleString();
+  document.getElementById('s-cols').textContent=d.cols;
+  document.getElementById('s-missing').textContent=d.missing;
+  document.getElementById('s-quality').textContent=d.quality;
+  let pt='<table><tr><th>Column</th><th>Type</th><th>Missing %</th><th>Unique</th><th>Quality</th></tr>';
+  d.columns.forEach(c=>{
+    const cls=c.quality==='Clean'?'good':c.quality==='Minor'?'good':c.quality==='Warning'?'warn':'bad';
+    const icon=c.quality==='Clean'?'✓':c.quality==='Minor'?'~':c.quality==='Warning'?'⚠':'✗';
+    pt+=`<tr><td>${c.name}</td><td style="color:var(--dim)">${c.type}</td><td>${c.missing}%</td><td>${c.unique.toLocaleString()}</td><td class="${cls}">${icon} ${c.quality}</td></tr>`;
+  });
+  pt+='</table>';
+  document.getElementById('profile-table').innerHTML=pt;
+  let mt='<table><tr><th>Column</th><th>Missing %</th><th>Visual</th><th>Status</th></tr>';
+  d.columns.filter(c=>c.missing>0).sort((a,b)=>b.missing-a.missing).forEach(c=>{
+    const color=c.missing>10?'#F38BA8':c.missing>5?'#F9E2AF':'#A6E3A1';
+    mt+=`<tr><td>${c.name}</td><td>${c.missing}%</td><td><div class="bar-cell"><div class="bar"><div class="fill" style="width:${Math.min(100,c.missing*3)}%;background:${color};"></div></div></div></td><td class="${c.missing>10?'bad':c.missing>5?'warn':'good'}">${c.missing>10?'Action needed':c.missing>5?'Monitor':'Acceptable'}</td></tr>`;
+  });
+  if(d.columns.filter(c=>c.missing>0).length===0)mt+='<tr><td colspan="4" style="text-align:center;color:var(--green);">No missing values found!</td></tr>';
+  mt+='</table>';
+  document.getElementById('missing-table').innerHTML=mt;
+  let sl='';
+  d.suggestions.forEach(s=>{
+    sl+=`<div class="suggestion"><div class="method"><span class="arrow">${s.col}</span> → ${s.method}</div><div class="reason">${s.reason}</div></div>`;
+  });
+  document.getElementById('suggest-list').innerHTML=sl;
+  let dc='<div class="chart-bars">';
+  d.columns.forEach(c=>{
+    const h=Math.max(10,100-c.missing*3);
+    const color=c.missing===0?'#A6E3A1':c.missing<5?'#89B4FA':c.missing<10?'#F9E2AF':'#F38BA8';
+    dc+=`<div class="chart-bar" style="height:${h}%;background:${color};"><div class="lbl">${c.name}</div></div>`;
+  });
+  dc+='</div><div style="text-align:center;margin-top:24px;font-size:11px;color:var(--dim);">Data Completeness by Column (taller = more complete)</div>';
+  document.getElementById('dist-chart').innerHTML=dc;
+  document.getElementById('output').scrollIntoView({behavior:'smooth'});
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
