@@ -3,96 +3,274 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>dxplorer — Data Quality Profiler Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>dxplorer — Data Quality Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--bg:#1E1E2E;--card:#181825;--border:#313244;--accent:#89B4FA;--green:#A6E3A1;--red:#F38BA8;--yellow:#F9E2AF;--text:#CDD6F4;--dim:#6C7086;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-.nav{background:#11111B;border-bottom:1px solid var(--border);padding:14px 30px;display:flex;justify-content:space-between;align-items:center;}
-.nav .logo{font-size:20px;font-weight:900;color:var(--accent);font-family:'JetBrains Mono',monospace;}.nav .logo span{color:var(--dim);}
-.nav .badges{display:flex;gap:8px;}
-.nav .badge{padding:3px 10px;border-radius:6px;font-size:10px;font-weight:600;border:1px solid;}
-.nav .badge.pypi{background:#F9E2AF15;color:var(--yellow);border-color:#F9E2AF44;}
-.nav .badge.demo{background:#F59E0B22;color:#FBBF24;border-color:#F59E0B44;}
-.container{max-width:1100px;margin:0 auto;padding:24px;}
-.hero{text-align:center;margin-bottom:24px;}
-.hero h1{font-size:28px;font-weight:900;margin-bottom:6px;}
-.hero p{font-size:14px;color:var(--dim);}
-.install{background:var(--green);color:#1E1E2E;text-align:center;padding:10px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;margin-bottom:20px;}
-.tabs{display:flex;gap:4px;margin-bottom:16px;}
-.tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--card);border:1px solid var(--border);color:var(--dim);transition:all 0.2s;}
-.tab.active{background:var(--accent);color:#1E1E2E;border-color:var(--accent);}
-.section{display:none;}.section.active{display:block;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
-.card h3{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
-.dataset-btn{background:var(--accent);color:#1E1E2E;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin:4px;transition:all 0.2s;}
-.dataset-btn:hover{opacity:0.9;}
-.dataset-btn.active{box-shadow:0 0 0 3px rgba(137,180,250,0.3);}
-table{width:100%;border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace;}
-table th{text-align:left;padding:8px 12px;background:#11111B;color:var(--accent);font-weight:700;border-bottom:2px solid var(--border);}
-table td{padding:8px 12px;border-bottom:1px solid var(--border);}
-.good{color:var(--green);}
-.warn{color:var(--yellow);}
-.bad{color:var(--red);}
-.bar-cell{display:flex;align-items:center;gap:8px;}
-.bar-cell .bar{flex:1;height:8px;background:#11111B;border-radius:4px;overflow:hidden;}
-.bar-cell .bar .fill{height:100%;border-radius:4px;}
-.suggestion{background:#11111B;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
-.suggestion .method{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.suggestion .reason{font-size:10px;color:var(--dim);}
-.suggestion .arrow{color:var(--accent);}
-.chart-bars{display:flex;align-items:flex-end;gap:4px;height:120px;padding:10px 0;}
-.chart-bar{flex:1;border-radius:3px 3px 0 0;position:relative;transition:height 0.5s ease;}
-.chart-bar .lbl{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--dim);white-space:nowrap;}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
-.stat .num{font-size:24px;font-weight:900;font-family:'JetBrains Mono',monospace;}
-.stat .lbl{font-size:10px;color:var(--dim);margin-top:2px;}
-@media(max-width:768px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+:root{
+  --page-bg:#F7ECD9;
+  --frame-bg:#FBF7EF;
+  --white:#FFFFFF;
+  --border:#EFE4CE;
+  --ink:#1E1B16;
+  --dim:#83786A;
+  --faint:#B0A491;
+  --peach:#FDE9CE;
+  --orange-dark:#B23A0D;
+  --orange:#E8720C;
+  --orange-light:#F3A65C;
+  --green:#2C5F2D;
+  --green-bg:#DEEBD9;
+  --amber:#A8791E;
+  --amber-bg:#F4E7C9;
+  --red:#B23A2E;
+  --red-bg:#F7DEDA;
+  --gray-bg:#EFEDE8;
+  --sans:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--sans);background:var(--page-bg);min-height:100vh;color:var(--ink);padding:26px;}
+.frame{max-width:1300px;margin:0 auto;background:var(--frame-bg);border-radius:26px;border:1px solid var(--border);padding:20px;display:flex;gap:16px;}
+
+/* SIDEBAR */
+.sidebar{width:56px;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:6px;}
+.sicon-btn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--dim);cursor:default;}
+.sicon-btn.active{background:var(--orange);color:var(--white);}
+.sicon-btn svg{width:18px;height:18px;}
+.sidebar .spacer{flex:1;}
+
+/* MAIN */
+.main{flex:1;min-width:0;}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;margin-right:8px;}
+.brand .mark{width:28px;height:28px;border-radius:8px;background:var(--orange);}
+.askai{background:linear-gradient(135deg,var(--orange),var(--orange-light));color:#fff;border:none;padding:9px 16px;border-radius:20px;font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:6px;}
+.searchbox{flex:1;min-width:160px;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:9px 16px;font-size:12.5px;color:var(--faint);}
+.dataset-select{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:9px 16px;font-size:12.5px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer;}
+.ds-wrap{display:flex;flex-direction:column;gap:3px;}
+.ds-wrap label{font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--faint);padding-left:4px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--peach);border:1px solid var(--border);}
+
+.pagehead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.pagehead h1{font-size:26px;font-weight:800;letter-spacing:-0.02em;}
+.pagehead p{font-size:13px;color:var(--dim);margin-top:4px;}
+.seg{display:flex;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:3px;}
+.seg .s{padding:7px 14px;border-radius:16px;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;}
+.seg .s.active{background:var(--orange);color:#fff;}
+
+/* GRID ROWS */
+.row{display:grid;gap:14px;margin-bottom:14px;}
+.row.hero{grid-template-columns:1.4fr 1fr 1fr;}
+.row.mid{grid-template-columns:1.7fr 1fr;align-items:start;}
+.row.bottom{grid-template-columns:1fr 1.3fr;}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:20px;}
+.card h3{font-size:15px;font-weight:700;}
+.card .sub{font-size:11.5px;color:var(--faint);margin-top:2px;}
+
+/* HERO GRADIENT CARD */
+.hero-card{background:linear-gradient(135deg,var(--orange-dark),var(--orange));border-radius:18px;padding:22px;color:#fff;}
+.hero-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.hero-card h3{font-size:16px;font-weight:700;}
+.pill-status{background:rgba(255,255,255,.9);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:14px;}
+.pill-status.warn{color:var(--red);}
+.track{height:9px;background:rgba(255,255,255,.28);border-radius:6px;overflow:hidden;display:flex;align-items:center;margin-bottom:10px;}
+.track .fill{height:100%;background:rgba(255,255,255,.95);border-radius:6px;}
+.hero-bottom{display:flex;justify-content:space-between;align-items:baseline;}
+.hero-bottom .pct{font-size:26px;font-weight:800;}
+.hero-bottom .note{font-size:11.5px;opacity:.85;}
+
+/* STAT CARDS */
+.stat-card .val{font-size:26px;font-weight:800;margin:8px 0 4px;}
+.stat-card .track{background:var(--gray-bg);}
+.stat-card .track .fill{background:var(--orange);}
+
+/* TABLE PANEL */
+.table-panel{overflow-x:auto;}
+.table-panel .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px;}
+table th{text-align:left;padding:8px 10px;color:var(--faint);font-weight:600;font-size:10.5px;border-bottom:1px solid var(--border);}
+table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table tr:last-child td{border-bottom:none;}
+.coltype{font-family:var(--mono);font-size:10.5px;color:var(--faint);background:var(--gray-bg);padding:2px 7px;border-radius:5px;}
+.gbar-track{height:9px;background:var(--gray-bg);border-radius:5px;overflow:hidden;min-width:100px;}
+.gbar-fill{height:100%;border-radius:5px;}
+.legend{display:flex;gap:18px;margin-top:14px;font-size:11.5px;color:var(--dim);flex-wrap:wrap;}
+.legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+
+/* SIDE PANEL */
+.side-stack{display:flex;flex-direction:column;gap:14px;}
+.qb-bar{display:flex;height:11px;border-radius:6px;overflow:hidden;margin:12px 0 14px;}
+.qb-legend{display:flex;flex-direction:column;gap:8px;font-size:12px;margin-bottom:12px;}
+.qb-legend div{display:flex;justify-content:space-between;}
+.qb-legend .k{display:flex;align-items:center;gap:7px;color:var(--dim);}
+.qb-legend .dot{width:8px;height:8px;border-radius:50%;}
+.qb-total{display:flex;justify-content:space-between;font-size:12.5px;padding-top:10px;border-top:1px solid var(--border);font-weight:700;}
+
+.ai-card{background:linear-gradient(135deg,var(--orange-dark),#7A2A0B);border-radius:18px;padding:20px;color:#fff;}
+.ai-badge{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px;margin-bottom:14px;}
+.ai-badge .new{background:rgba(255,255,255,.22);font-size:9.5px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.ai-card h4{font-size:15px;font-weight:700;margin-bottom:8px;}
+.ai-card p{font-size:12px;opacity:.9;line-height:1.5;margin-bottom:14px;}
+.ai-btn{background:#fff;color:var(--orange-dark);border:none;padding:9px 16px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:22px;}
+.donut{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.donut .hole{width:78px;height:78px;background:var(--white);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut .hole b{font-size:20px;font-weight:800;}
+.donut .hole span{font-size:9.5px;color:var(--faint);}
+.dl{font-size:12.5px;}
+.dl div{display:flex;justify-content:space-between;gap:16px;padding:5px 0;color:var(--dim);}
+.dl .k{display:flex;align-items:center;gap:7px;}
+.dl .dot{width:8px;height:8px;border-radius:50%;}
+.dl b{color:var(--ink);}
+
+/* LIST PANEL */
+.hlist-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.hlist-row:last-child{border-bottom:none;}
+.hlist-row .name{flex:1;font-weight:600;}
+.status-pill{font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:12px;min-width:64px;text-align:center;}
+.status-pill.clean{background:var(--green-bg);color:var(--green);}
+.status-pill.warning{background:var(--amber-bg);color:var(--amber);}
+.status-pill.action{background:var(--red-bg);color:var(--red);}
+.hlist-row .num{font-family:var(--mono);color:var(--dim);min-width:40px;text-align:right;}
+.viewmore{width:100%;background:var(--orange);color:#fff;border:none;padding:11px;border-radius:11px;font-weight:700;font-size:12.5px;cursor:pointer;margin-top:14px;}
+
+/* SUGGESTIONS ROW */
+.suggestion{border:1px solid var(--border);border-radius:13px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.suggestion:last-child{margin-bottom:0;}
+.sicon{width:30px;height:30px;border-radius:9px;background:var(--peach);color:var(--orange-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;font-family:var(--mono);}
+.suggestion .method{font-size:13px;font-weight:700;margin-bottom:3px;}
+.suggestion .method .col{color:var(--orange-dark);}
+.suggestion .reason{font-size:12.5px;color:var(--dim);line-height:1.45;}
+
+@media(max-width:980px){
+  .frame{flex-direction:column;}
+  .sidebar{flex-direction:row;width:auto;}
+  .row.hero,.row.mid,.row.bottom{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
-<div class="nav">
-  <div class="logo">dxplorer<span> — Data Quality Profiler</span></div>
-  <div class="badges"><span class="badge demo">INTERACTIVE DEMO</span><span class="badge pypi">PyPI Published</span></div>
-</div>
-<div class="container">
-  <div class="install">$ pip install dxplorer</div>
-  <div class="hero">
-    <h1>Upload or Select a Dataset to Profile</h1>
-    <p>Click a sample dataset below to see dxplorer in action</p>
+<div class="frame">
+
+  <div class="sidebar">
+    <div class="sicon-btn active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="sicon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></div>
+    <div class="sicon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2z"/></svg></div>
+    <div class="sicon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M10.3 7.6L6.7 15.8M13.7 7.6l3.6 8.2"/></svg></div>
+    <div class="sicon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.2"/><path d="M4 20c0-3.5 3.2-6 8-6s8 2.5 8 6"/></svg></div>
+    <div class="spacer"></div>
+    <div class="sicon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 1.8-2.5 3.5M12 17h.01"/></svg></div>
   </div>
-  <div style="text-align:center;margin-bottom:24px;">
-    <button class="dataset-btn" onclick="loadDataset('ecommerce')">🛒 E-Commerce Sales</button>
-    <button class="dataset-btn" onclick="loadDataset('healthcare')">🏥 Patient Records</button>
-    <button class="dataset-btn" onclick="loadDataset('hr')">👥 HR Employee Data</button>
-  </div>
-  <div id="output" style="display:none;">
-    <div class="stats-row">
-      <div class="stat"><div class="num" style="color:#89B4FA;" id="s-rows">—</div><div class="lbl">Rows</div></div>
-      <div class="stat"><div class="num" style="color:#A6E3A1;" id="s-cols">—</div><div class="lbl">Columns</div></div>
-      <div class="stat"><div class="num" style="color:#F9E2AF;" id="s-missing">—</div><div class="lbl">Missing Values</div></div>
-      <div class="stat"><div class="num" style="color:#F38BA8;" id="s-quality">—</div><div class="lbl">Quality Score</div></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="brand"><div class="mark"></div>dxplorer</div>
+      <div class="askai">✨ Ask AI</div>
+      <div class="searchbox">Search columns, datasets…</div>
+      <div class="ds-wrap">
+        <label for="dataset-select">Select dataset</label>
+        <select class="dataset-select" id="dataset-select" onchange="loadDataset(this.value)">
+          <option value="ecommerce">E-commerce sales</option>
+          <option value="healthcare">Patient records</option>
+          <option value="hr">HR employee data</option>
+        </select>
+      </div>
+      <div class="avatar"></div>
     </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('profile',this)">📊 Profile</div>
-      <div class="tab" onclick="switchTab('missing',this)">🔍 Missing Analysis</div>
-      <div class="tab" onclick="switchTab('suggest',this)">🤖 AI Suggestions</div>
-      <div class="tab" onclick="switchTab('dist',this)">📈 Distributions</div>
+
+    <div class="pagehead">
+      <div>
+        <h1>Data Quality Dashboard</h1>
+        <p>Profile datasets and catch issues before they ship</p>
+      </div>
+      <div class="seg"><div class="s active">Full scan</div><div class="s">Sampled</div><div class="s">Incremental</div></div>
     </div>
-    <div class="section active" id="tab-profile"><div class="card"><h3>Column Profile</h3><div id="profile-table"></div></div></div>
-    <div class="section" id="tab-missing"><div class="card"><h3>Missing Value Heatmap</h3><div id="missing-table"></div></div></div>
-    <div class="section" id="tab-suggest"><div class="card"><h3>AI Imputation Suggestions</h3><div id="suggest-list"></div></div></div>
-    <div class="section" id="tab-dist"><div class="card"><h3>Value Distributions</h3><div id="dist-chart"></div></div></div>
+
+    <div class="row hero">
+      <div class="hero-card">
+        <div class="top"><h3>Overall Data Quality</h3><div class="pill-status" id="hero-status">On track</div></div>
+        <div class="track"><div class="fill" id="hero-fill" style="width:0%"></div></div>
+        <div class="hero-bottom"><div class="pct" id="hero-pct">—</div><div class="note" id="hero-note">quality score</div></div>
+      </div>
+      <div class="card stat-card">
+        <h3>Missing Values</h3>
+        <div class="val" id="stat-missing">—</div>
+        <div class="sub" id="stat-missing-sub">of total cells</div>
+        <div class="track" style="margin-top:10px;"><div class="fill" id="stat-missing-fill" style="width:0%"></div></div>
+      </div>
+      <div class="card stat-card">
+        <h3>Clean Columns</h3>
+        <div class="val" id="stat-clean">—</div>
+        <div class="sub" id="stat-clean-sub">of total columns</div>
+        <div class="track" style="margin-top:10px;"><div class="fill" id="stat-clean-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="row mid">
+      <div class="card table-panel">
+        <div class="head">
+          <div><h3>Column Profile</h3><div class="sub" id="table-sub">— columns</div></div>
+        </div>
+        <table>
+          <tr><th>Column</th><th>Type</th><th>Completeness</th><th>Unique</th></tr>
+          <tbody id="profile-rows"></tbody>
+        </table>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--green)"></span>Clean</span>
+          <span><span class="dot" style="background:var(--amber)"></span>Warning</span>
+          <span><span class="dot" style="background:var(--red)"></span>Action needed</span>
+        </div>
+      </div>
+
+      <div class="side-stack">
+        <div class="card">
+          <h3>Quality Breakdown</h3>
+          <div class="qb-bar" id="qb-bar"></div>
+          <div class="qb-legend" id="qb-legend"></div>
+          <div class="qb-total"><span>Total Columns</span><span id="qb-total">—</span></div>
+        </div>
+        <div class="ai-card">
+          <div class="ai-badge">✨ AI Insight <span class="new">New</span></div>
+          <h4 id="ai-title">—</h4>
+          <p id="ai-reason">—</p>
+          <button class="ai-btn">View suggestions ↓</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row bottom">
+      <div class="card">
+        <h3>Column Types</h3>
+        <div class="donut-wrap" style="margin-top:14px;">
+          <div class="donut" id="type-donut"><div class="hole"><b id="type-total">—</b><span>columns</span></div></div>
+          <div class="dl" id="type-legend"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><h3>Column Health</h3><div class="sub">sorted by missing %</div></div>
+        <div id="health-list" style="margin-top:6px;"></div>
+        <button class="viewmore" onclick="toggleHealth()" id="viewmore-btn">View more ↓</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>AI Suggestions — full imputation plan</h3>
+      <div class="sub" style="margin-bottom:14px;">Method recommendations for every column with missing data</div>
+      <div id="suggest-list"></div>
+    </div>
+
   </div>
 </div>
+
 <script>
 const datasets={
-  ecommerce:{rows:10847,cols:12,missing:"3.2%",quality:"87/100",
+  ecommerce:{path:"warehouse / sales / orders",rows:10847,cols:12,missing:3.2,quality:87,
     columns:[
       {name:"order_id",type:"int64",missing:0,unique:10847,quality:"Clean"},
-      {name:"customer_name",type:"object",missing:1.2,unique:8432,quality:"Minor"},
+      {name:"customer_name",type:"object",missing:1.2,unique:8432,quality:"Clean"},
       {name:"email",type:"object",missing:8.4,unique:9201,quality:"Action"},
       {name:"product",type:"object",missing:0,unique:342,quality:"Clean"},
       {name:"quantity",type:"int64",missing:0.3,unique:15,quality:"Clean"},
@@ -105,102 +283,149 @@ const datasets={
       {name:"review_score",type:"float64",missing:22.3,unique:5,quality:"Action"},
     ],
     suggestions:[
-      {col:"email",method:"Flag & exclude from model",reason:"8.4% missing — email is identifer, not a feature. Exclude from ML pipeline."},
+      {col:"email",method:"Flag & exclude from model",reason:"8.4% missing — email is an identifier, not a feature. Exclude from the ML pipeline."},
       {col:"discount",method:"Fill with 0 (no discount)",reason:"12.7% missing likely means no discount was applied. Domain logic suggests 0."},
-      {col:"shipping_address",method:"KNN Imputation (k=5)",reason:"5.6% missing — use nearest neighbor based on customer and region."},
+      {col:"shipping_address",method:"KNN imputation (k=5)",reason:"5.6% missing — use nearest neighbor based on customer and region."},
       {col:"review_score",method:"Drop or separate model",reason:"22.3% missing — too sparse for reliable imputation. Consider a separate analysis."},
-      {col:"customer_name",method:"Forward fill by customer_id",reason:"1.2% missing — fill from other orders by same customer."},
+      {col:"customer_name",method:"Forward fill by customer_id",reason:"1.2% missing — fill from other orders by the same customer."},
     ]},
-  healthcare:{rows:1647,cols:10,missing:"4.8%",quality:"82/100",
+  healthcare:{path:"clinical / intake / patients",rows:1647,cols:10,missing:4.8,quality:82,
     columns:[
       {name:"patient_id",type:"int64",missing:0,unique:1647,quality:"Clean"},
       {name:"age",type:"int64",missing:0,unique:53,quality:"Clean"},
       {name:"gender",type:"category",missing:0,unique:2,quality:"Clean"},
-      {name:"blood_pressure",type:"float64",missing:3.1,unique:89,quality:"Minor"},
-      {name:"heart_rate",type:"int64",missing:1.2,unique:61,quality:"Minor"},
-      {name:"bmi",type:"float64",missing:2.4,unique:187,quality:"Minor"},
+      {name:"blood_pressure",type:"float64",missing:3.1,unique:89,quality:"Clean"},
+      {name:"heart_rate",type:"int64",missing:1.2,unique:61,quality:"Clean"},
+      {name:"bmi",type:"float64",missing:2.4,unique:187,quality:"Clean"},
       {name:"cholesterol",type:"float64",missing:7.8,unique:124,quality:"Warning"},
       {name:"glucose",type:"float64",missing:5.3,unique:98,quality:"Warning"},
       {name:"ejection_fraction",type:"float64",missing:0,unique:42,quality:"Clean"},
       {name:"diagnosis",type:"category",missing:18.2,unique:8,quality:"Action"},
     ],
     suggestions:[
-      {col:"blood_pressure",method:"Median Imputation",reason:"3.1% missing — normally distributed, median preserves central tendency."},
-      {col:"cholesterol",method:"KNN Imputation (k=7)",reason:"7.8% missing — correlated with age and BMI, KNN captures this relationship."},
-      {col:"glucose",method:"Iterative Imputation (MICE)",reason:"5.3% missing — multiple correlations with other clinical features."},
+      {col:"blood_pressure",method:"Median imputation",reason:"3.1% missing — normally distributed, median preserves central tendency."},
+      {col:"cholesterol",method:"KNN imputation (k=7)",reason:"7.8% missing — correlated with age and BMI, KNN captures this relationship."},
+      {col:"glucose",method:"Iterative imputation (MICE)",reason:"5.3% missing — multiple correlations with other clinical features."},
       {col:"diagnosis",method:"Exclude from training, predict separately",reason:"18.2% missing — this is likely the target variable. Do not impute."},
-      {col:"heart_rate",method:"Mean Imputation",reason:"1.2% missing — low missingness, mean is sufficient."},
+      {col:"heart_rate",method:"Mean imputation",reason:"1.2% missing — low missingness, mean is sufficient."},
     ]},
-  hr:{rows:5234,cols:11,missing:"6.1%",quality:"79/100",
+  hr:{path:"people / core / employees",rows:5234,cols:11,missing:6.1,quality:79,
     columns:[
       {name:"employee_id",type:"int64",missing:0,unique:5234,quality:"Clean"},
       {name:"name",type:"object",missing:0,unique:5234,quality:"Clean"},
       {name:"department",type:"category",missing:0,unique:8,quality:"Clean"},
       {name:"salary",type:"float64",missing:4.2,unique:2341,quality:"Warning"},
-      {name:"years_experience",type:"int64",missing:1.8,unique:35,quality:"Minor"},
+      {name:"years_experience",type:"int64",missing:1.8,unique:35,quality:"Clean"},
       {name:"performance_score",type:"float64",missing:8.7,unique:10,quality:"Action"},
       {name:"satisfaction",type:"float64",missing:12.4,unique:10,quality:"Action"},
       {name:"last_promotion",type:"datetime",missing:15.3,unique:1200,quality:"Action"},
-      {name:"education",type:"category",missing:3.1,unique:4,quality:"Minor"},
+      {name:"education",type:"category",missing:3.1,unique:4,quality:"Clean"},
       {name:"remote_work",type:"boolean",missing:0,unique:2,quality:"Clean"},
       {name:"attrition",type:"boolean",missing:0,unique:2,quality:"Clean"},
     ],
     suggestions:[
       {col:"salary",method:"Median by department",reason:"4.2% missing — salaries vary by department. Group median preserves structure."},
       {col:"performance_score",method:"Mode by department + years",reason:"8.7% missing — categorical scale, use most frequent within group."},
-      {col:"satisfaction",method:"KNN Imputation (k=5)",reason:"12.4% missing — correlated with performance and attrition."},
-      {col:"last_promotion",method:"Flag as 'never promoted'",reason:"15.3% missing — likely means employee was never promoted. Create binary flag."},
-      {col:"education",method:"Mode Imputation",reason:"3.1% missing — categorical with 4 levels, mode is appropriate."},
+      {col:"satisfaction",method:"KNN imputation (k=5)",reason:"12.4% missing — correlated with performance and attrition."},
+      {col:"last_promotion",method:"Flag as 'never promoted'",reason:"15.3% missing — likely means the employee was never promoted. Create a binary flag."},
+      {col:"education",method:"Mode imputation",reason:"3.1% missing — categorical with 4 levels, mode is appropriate."},
     ]}
 };
 
+const qcolor={Clean:'var(--green)',Warning:'var(--amber)',Action:'var(--red)'};
+const qclass={Clean:'clean',Warning:'warning',Action:'action'};
+let healthExpanded=false;
+
 function loadDataset(name){
-  document.querySelectorAll('.dataset-btn').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
   const d=datasets[name];
-  document.getElementById('output').style.display='block';
-  document.getElementById('s-rows').textContent=d.rows.toLocaleString();
-  document.getElementById('s-cols').textContent=d.cols;
-  document.getElementById('s-missing').textContent=d.missing;
-  document.getElementById('s-quality').textContent=d.quality;
-  let pt='<table><tr><th>Column</th><th>Type</th><th>Missing %</th><th>Unique</th><th>Quality</th></tr>';
-  d.columns.forEach(c=>{
-    const cls=c.quality==='Clean'?'good':c.quality==='Minor'?'good':c.quality==='Warning'?'warn':'bad';
-    const icon=c.quality==='Clean'?'✓':c.quality==='Minor'?'~':c.quality==='Warning'?'⚠':'✗';
-    pt+=`<tr><td>${c.name}</td><td style="color:var(--dim)">${c.type}</td><td>${c.missing}%</td><td>${c.unique.toLocaleString()}</td><td class="${cls}">${icon} ${c.quality}</td></tr>`;
+  const cols=d.columns;
+  const cleanCount=cols.filter(c=>c.quality==='Clean').length;
+  const warnCount=cols.filter(c=>c.quality==='Warning').length;
+  const actionCount=cols.filter(c=>c.quality==='Action').length;
+
+  document.getElementById('hero-pct').textContent=d.quality+'%';
+  document.getElementById('hero-fill').style.width=d.quality+'%';
+  document.getElementById('hero-note').textContent=d.path;
+  const status=d.quality>=85?'On track':(d.quality>=75?'Monitor':'Needs attention');
+  document.getElementById('hero-status').textContent=status;
+  document.getElementById('hero-status').className='pill-status'+(d.quality<75?' warn':'');
+
+  document.getElementById('stat-missing').textContent=d.missing+'%';
+  document.getElementById('stat-missing-sub').textContent=d.rows.toLocaleString()+' rows scanned';
+  document.getElementById('stat-missing-fill').style.width=Math.min(100,d.missing*4)+'%';
+
+  document.getElementById('stat-clean').textContent=cleanCount;
+  document.getElementById('stat-clean-sub').textContent='of '+d.cols+' total columns';
+  document.getElementById('stat-clean-fill').style.width=(cleanCount/d.cols*100)+'%';
+
+  document.getElementById('table-sub').textContent=d.cols+' columns · '+d.path;
+  let rows='';
+  cols.forEach(c=>{
+    const completeness=100-c.missing;
+    rows+=`<tr><td>${c.name}</td><td><span class="coltype">${c.type}</span></td>
+      <td><div class="gbar-track" style="min-width:140px;"><div class="gbar-fill" style="width:${completeness}%;background:${qcolor[c.quality]}"></div></div></td>
+      <td class="sub" style="font-family:var(--mono);">${c.unique.toLocaleString()}</td></tr>`;
   });
-  pt+='</table>';
-  document.getElementById('profile-table').innerHTML=pt;
-  let mt='<table><tr><th>Column</th><th>Missing %</th><th>Visual</th><th>Status</th></tr>';
-  d.columns.filter(c=>c.missing>0).sort((a,b)=>b.missing-a.missing).forEach(c=>{
-    const color=c.missing>10?'#F38BA8':c.missing>5?'#F9E2AF':'#A6E3A1';
-    mt+=`<tr><td>${c.name}</td><td>${c.missing}%</td><td><div class="bar-cell"><div class="bar"><div class="fill" style="width:${Math.min(100,c.missing*3)}%;background:${color};"></div></div></div></td><td class="${c.missing>10?'bad':c.missing>5?'warn':'good'}">${c.missing>10?'Action needed':c.missing>5?'Monitor':'Acceptable'}</td></tr>`;
+  document.getElementById('profile-rows').innerHTML=rows;
+
+  const total=cols.length;
+  const cleanPct=cleanCount/total*100, warnPct=warnCount/total*100, actionPct=actionCount/total*100;
+  document.getElementById('qb-bar').innerHTML=
+    `<div style="width:${cleanPct}%;background:var(--green)"></div>
+     <div style="width:${warnPct}%;background:var(--amber)"></div>
+     <div style="width:${actionPct}%;background:var(--red)"></div>`;
+  document.getElementById('qb-legend').innerHTML=`
+    <div><span class="k"><span class="dot" style="background:var(--green)"></span>Clean</span><b>${cleanCount} cols</b></div>
+    <div><span class="k"><span class="dot" style="background:var(--amber)"></span>Warning</span><b>${warnCount} cols</b></div>
+    <div><span class="k"><span class="dot" style="background:var(--red)"></span>Action needed</span><b>${actionCount} cols</b></div>`;
+  document.getElementById('qb-total').textContent=total;
+
+  const top=d.suggestions[0];
+  document.getElementById('ai-title').textContent=top.col+' needs attention';
+  document.getElementById('ai-reason').textContent=top.reason+' Suggested: '+top.method+'.';
+
+  const typeCounts={};
+  cols.forEach(c=>{typeCounts[c.type]=(typeCounts[c.type]||0)+1;});
+  const typeColors=['var(--orange)','var(--green)','var(--amber)','var(--orange-dark)','var(--faint)'];
+  let cumulative=0, stops=[];
+  Object.entries(typeCounts).forEach(([t,n],i)=>{
+    const pct=n/total*100;
+    stops.push(`${typeColors[i%typeColors.length]} ${cumulative}% ${cumulative+pct}%`);
+    cumulative+=pct;
   });
-  if(d.columns.filter(c=>c.missing>0).length===0)mt+='<tr><td colspan="4" style="text-align:center;color:var(--green);">No missing values found!</td></tr>';
-  mt+='</table>';
-  document.getElementById('missing-table').innerHTML=mt;
+  document.getElementById('type-donut').style.background=`conic-gradient(${stops.join(',')})`;
+  document.getElementById('type-total').textContent=total;
+  let tl='';
+  Object.entries(typeCounts).forEach(([t,n],i)=>{
+    tl+=`<div><span class="k"><span class="dot" style="background:${typeColors[i%typeColors.length]}"></span>${t}</span><b>${n}</b></div>`;
+  });
+  document.getElementById('type-legend').innerHTML=tl;
+
+  const sorted=[...cols].sort((a,b)=>b.missing-a.missing);
+  window._sortedCols=sorted;
+  healthExpanded=false;
+  renderHealth();
+
   let sl='';
-  d.suggestions.forEach(s=>{
-    sl+=`<div class="suggestion"><div class="method"><span class="arrow">${s.col}</span> → ${s.method}</div><div class="reason">${s.reason}</div></div>`;
+  d.suggestions.forEach((s,i)=>{
+    sl+=`<div class="suggestion"><div class="sicon">${String(i+1).padStart(2,'0')}</div><div><div class="method"><span class="col">${s.col}</span> → ${s.method}</div><div class="reason">${s.reason}</div></div></div>`;
   });
   document.getElementById('suggest-list').innerHTML=sl;
-  let dc='<div class="chart-bars">';
-  d.columns.forEach(c=>{
-    const h=Math.max(10,100-c.missing*3);
-    const color=c.missing===0?'#A6E3A1':c.missing<5?'#89B4FA':c.missing<10?'#F9E2AF':'#F38BA8';
-    dc+=`<div class="chart-bar" style="height:${h}%;background:${color};"><div class="lbl">${c.name}</div></div>`;
-  });
-  dc+='</div><div style="text-align:center;margin-top:24px;font-size:11px;color:var(--dim);">Data Completeness by Column (taller = more complete)</div>';
-  document.getElementById('dist-chart').innerHTML=dc;
-  document.getElementById('output').scrollIntoView({behavior:'smooth'});
 }
 
-function switchTab(name,el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  el.classList.add('active');
+function renderHealth(){
+  const sorted=window._sortedCols;
+  const shown=healthExpanded?sorted:sorted.slice(0,4);
+  let hl='';
+  shown.forEach(c=>{
+    hl+=`<div class="hlist-row"><div class="name">${c.name}</div><div class="status-pill ${qclass[c.quality]}">${c.quality}</div><div class="num">${c.missing}%</div></div>`;
+  });
+  document.getElementById('health-list').innerHTML=hl;
+  document.getElementById('viewmore-btn').textContent=healthExpanded?'View less ↑':'View more ↓';
 }
+function toggleHealth(){healthExpanded=!healthExpanded;renderHealth();}
+
+loadDataset('ecommerce');
 </script>
 </body>
 </html>
